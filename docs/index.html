@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oplus OCDT Converter</title>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      overflow: hidden;
+    }
+
+    .converter {
+      max-width: 400px;
+      width: 90%;
+      padding: 2rem;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .converter:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      color: #333;
+      margin-bottom: 1.5rem;
+      font-weight: 500;
+    }
+
+    input[type="file"],
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: border-color 0.3s ease, transform 0.2s ease, background 0.3s ease;
+      margin-bottom: 1rem;
+    }
+
+    input::placeholder {
+      color: rgba(0, 0, 0, 0.5);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #3f51b5;
+      background: rgba(255, 255, 255, 1);
+      transform: scale(1.02);
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      background: #3f51b5;
+      color: #fff;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s ease, transform 0.2s ease;
+      margin-bottom: 0.5rem;
+    }
+
+    button:hover {
+      background: #5c6bc0;
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    /* Ripple effect */
+    button::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    button:active::before {
+      width: 300px;
+      height: 300px;
+    }
+
+    .result {
+      margin-top: 1.5rem;
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #333;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 10px;
+      border-radius: 8px;
+      min-height: 24px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Popup styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 2rem;
+      max-width: 90%;
+      width: 400px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      text-align: center;
+      position: relative;
+    }
+
+    .modal-content h2 {
+      font-size: 1.5rem;
+      color: #333;
+      margin-bottom: 1rem;
+    }
+
+    .modal-content p {
+      font-size: 1rem;
+      color: #555;
+      margin-bottom: 1.5rem;
+    }
+
+    .close-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 1.2rem;
+      color: #333;
+      cursor: pointer;
+      background: none;
+      border: none;
+      transition: color 0.3s ease;
+    }
+
+    .close-button:hover {
+      color: #3f51b5;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .converter {
+        padding: 1.5rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      input, button {
+        font-size: 0.9rem;
+      }
+
+      .modal-content {
+        width: 80%;
+        padding: 1.5rem;
+      }
+
+      .modal-content h2 {
+        font-size: 1.3rem;
+      }
+
+      .modal-content p {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="converter">
+    <h1>Oplus OCDT Converter by Rahul Patidar</h1>
+    <input type="file" id="binFile" accept=".bin">
+    <input type="number" id="findValue" placeholder="Value to find in file">
+    <input type="number" id="replaceValue" placeholder="Replace with">
+    <button onclick="replaceAndSave()">Convert & Download</button>
+    <button onclick="showAbout()">About</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <!-- About Popup -->
+  <div class="modal" id="aboutModal">
+    <div class="modal-content">
+      <button class="close-button" onclick="closeAbout()">✕</button>
+      <h2>About Oplus OCDT Converter</h2>
+      <p>
+        Oplus OCDT Converter is a tool for editing binary (.bin) files. Select a file, specify a 32-bit integer value to find, and replace all occurrences with a new value. The modified file is downloaded for further use.<br><br>
+        Version: 1.0.0<br>
+        Developed by <a href="#">Rahul Patidar</a> with ❤️ for simplicity and precision.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    let fileData = null; // Store the binary file data
+    let originalFileName = ''; // Store the original file name
+
+    function replaceAndSave() {
+      const fileInput = document.getElementById('binFile');
+      const findValueInput = document.getElementById('findValue');
+      const replaceValueInput = document.getElementById('replaceValue');
+      const result = document.getElementById('result');
+
+      // Validate inputs
+      if (!fileInput.files.length) {
+        alert('Please select a .bin file.');
+        return;
+      }
+      if (findValueInput.value === '' || replaceValueInput.value === '') {
+        alert('Please enter both find and replace values.');
+        return;
+      }
+
+      const findValue = parseInt(findValueInput.value, 10);
+      const replaceValue = parseInt(replaceValueInput.value, 10);
+      if (isNaN(findValue) || isNaN(replaceValue)) {
+        alert('Please enter valid decimal numbers.');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      originalFileName = file.name;
+      const reader = new FileReader();
+
+      reader.onload = function(e) {
+        fileData = new Uint8Array(e.target.result);
+        const dataView = new DataView(fileData.buffer);
+        let replacementCount = 0;
+
+        // Search for the 32-bit integer (little-endian) and replace all occurrences
+        for (let offset = 0; offset <= fileData.length - 4; offset += 4) {
+          const currentValue = dataView.getUint32(offset, true);
+          if (currentValue === findValue) {
+            dataView.setUint32(offset, replaceValue, true);
+            replacementCount++;
+          }
+        }
+
+        if (replacementCount === 0) {
+          alert(`Value ${findValue} not found in the file.`);
+          result.textContent = `Value ${findValue} not found.`;
+          return;
+        }
+
+        // Create a new Blob and trigger download
+        const blob = new Blob([fileData], { type: 'application/octet-stream' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = originalFileName.replace('.bin', '_modified.bin');
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        result.textContent = `Replaced ${replacementCount} occurrence(s) of ${findValue} with ${replaceValue} (Hex: ${replaceValue.toString(16).toUpperCase()})`;
+      };
+
+      reader.onerror = function() {
+        alert('Error reading the file.');
+      };
+
+      reader.readAsArrayBuffer(file);
+    }
+
+    function showAbout() {
+      const modal = document.getElementById('aboutModal');
+      modal.style.display = 'flex';
+    }
+
+    function closeAbout() {
+      const modal = document.getElementById('aboutModal');
+      modal.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
